@@ -14,10 +14,19 @@ import {FormsModule} from '@angular/forms';
 import { ToastrModule } from 'ngx-toastr';
 import { ModalModule } from 'ngx-bootstrap/modal';
 import { ViewResourceComponent } from './view-resource/view-resource.component';
+import {ViewModelComponent} from './view-model/view-model.component';
+import { ModelJsonCreatorComponent } from './model-json-creator/model-json-creator.component';
+import { UrlValidDirective } from '../directives/url-directive/url-valid.directive';
+import { ModelActionsComponent } from './model-actions/model-actions.component';
+import { ReactiveFormsModule } from '@angular/forms';
+import { RouteValidDirective } from '../directives/route-directive/route-valid.directive';
+import { ErrorPageComponent } from './error-page/error-page.component';
+import { ConfirmDeleteComponent } from './confirm-delete/confirm-delete.component';
 
 @NgModule({
   declarations: [
     AppComponent,
+    UrlValidDirective,
     HomePageComponent,
     HeaderComponent,
     HomeViewComponent,
@@ -25,11 +34,19 @@ import { ViewResourceComponent } from './view-resource/view-resource.component';
     ViewProjectComponent,
     ResourceActionsComponent,
     ViewResourceComponent,
+    ViewModelComponent,
+    ModelJsonCreatorComponent,
+    UrlValidDirective,
+    ModelActionsComponent,
+    RouteValidDirective,
+    ErrorPageComponent,
+    ConfirmDeleteComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     BrowserAnimationsModule,
+    ReactiveFormsModule,
     ToastrModule.forRoot(),
     ModalModule.forRoot(),
     FormsModule

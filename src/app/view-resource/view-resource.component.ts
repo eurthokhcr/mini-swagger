@@ -1,11 +1,13 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit, Output, EventEmitter} from '@angular/core';
 import {Resource} from '../../interfaces/resource';
 import {ResourceService} from '../../services/resource-service/resource.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {ProjectService} from '../../services/project-service/project.service';
 import {ActivatedRoute} from '@angular/router';
 import {ToastrService} from 'ngx-toastr';
-import {zip} from 'rxjs';
+import {Project} from '../../interfaces/project';
+import {EntitiesEnum} from '../../enums/entities.enum';
+import {ConfirmDeleteComponent} from '../confirm-delete/confirm-delete.component';
 
 @Component({
   selector: 'app-view-resource',
@@ -14,33 +16,38 @@ import {zip} from 'rxjs';
 })
 export class ViewResourceComponent implements OnInit {
   public resources: Resource[];
-  public projectIndex: number;
-  public projectName; string;
+  @Input() public projectName: string;
+  @Output() deletedResource = new EventEmitter<Project>();
+  public project: Project;
+  public expandedResource: Resource = null;
 
   constructor(private activatedRoute: ActivatedRoute, private projectService: ProjectService,
-              private resourceService: ResourceService,  private toastr: ToastrService) { }
+              private resourceService: ResourceService,  private toastr: ToastrService, private modalService: BsModalService) { }
 
   ngOnInit(): void {
-    const mergedObserves = zip(this.activatedRoute.queryParams, this.projectService.getProjects());
-    const subscription = mergedObserves.subscribe(paramsAndProject => {
-      this.projectName = paramsAndProject[0].projectName;
-      for (const [i, project] of paramsAndProject[1].entries()) {
-        if (project.name === this.projectName) {
-          this.resources = project.resources;
-          this.projectIndex = i;
-        }
-      }
+    this.projectService.getProjects().subscribe(currentProjects => {
+      this.project = currentProjects.find(project =>  project.name === this.projectName);
+      this.resources = this.project.resources;
     });
-    subscription.unsubscribe();
   }
 
   deleteResource(resource: Resource): void {
-    const deleteSub = this.resourceService.deleteResource(this.projectIndex, resource).subscribe(projects => {
-      this.toastr.success(`Successfully deleted resource ${resource.name} in project ${projects[this.projectIndex].name}`, 'Resource');
-      this.resources = projects[this.projectIndex].resources;
-    },
-      err => this.toastr.error(err, 'Resource')
-    );
-    deleteSub.unsubscribe();
+    const confirmDelete = this.modalService.show(ConfirmDeleteComponent,
+      {initialState: {name: resource.name, type: EntitiesEnum.Resource}});
+    confirmDelete.content.onClose.subscribe(result => {
+      if (result) {
+        this.resourceService.deleteResource(this.project, resource).subscribe(projects => {
+            this.toastr.success(`Successfully deleted resource ${resource.name} in project ${this.projectName}`, EntitiesEnum.Resource);
+            this.resources = this.project.resources;
+            this.deletedResource.emit(this.project);
+          },
+          err => this.toastr.error(err, EntitiesEnum.Resource)
+        );
+      }
+    });
+  }
+
+  expandResourceBody(resource: Resource): void {
+    this.expandedResource = resource;
   }
 }

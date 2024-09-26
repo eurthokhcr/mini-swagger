@@ -1,4 +1,4 @@
-<h1 class="title"> Your Projects </h1>
+<h1 class="text-center"> Your Projects </h1>
 <div class="container">
   <div class="table-wrapper">
     <table class="table">
@@ -9,7 +9,6 @@
         <th scope="col">Project Name</th>
         <th scope="col">API base url</th>
         <th scope="col">Description</th>
-        <th scope="col">Resources</th>
       </tr>
       </thead>
       <tbody>
@@ -22,20 +21,11 @@
             <span class="p-2"></span>
             <img
               [queryParams]="{name: project.name, fullApiUrl: project.fullApiUrl, description: project.description, edit: true}"
-              routerLink="/project" src="/assets/img/pencil.svg" alt="" width="20" height="20" title="Edit Project">
+              routerLink="/project" src="/assets/img/eye-fill.svg" alt="" width="20" height="20" title="View Project">
           </td>
           <td>{{project.name}}</td>
           <td>{{project.fullApiUrl}}</td>
           <td>{{project.description}}</td>
-          <td>
-            <button
-              routerLink="/viewResources"
-              [queryParams]="{projectName: project.name}"
-              type="submit"
-              class="btn btn-primary btn-sm">
-              View Resources
-            </button>
-          </td>
         </tr>
       </ng-container>
       </tbody>

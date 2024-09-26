@@ -2,6 +2,13 @@ import {Component, OnInit} from '@angular/core';
 import {ProjectService} from '../../services/project-service/project.service';
 import {Project} from '../../interfaces/project';
 import {ToastrService} from 'ngx-toastr';
+import {BsModalService} from 'ngx-bootstrap/modal';
+import {Model} from '../../interfaces/model';
+import {ViewModelComponent} from '../view-model/view-model.component';
+import {ModelService} from '../../services/model-service/model.service';
+import {Subscription} from 'rxjs';
+import {EntitiesEnum} from '../../enums/entities.enum';
+import {ConfirmDeleteComponent} from '../confirm-delete/confirm-delete.component';
 
 
 @Component({
@@ -11,25 +18,29 @@ import {ToastrService} from 'ngx-toastr';
 })
 export class ViewProjectComponent implements OnInit {
   public projects: Project[];
+  public model: Model;
 
-  constructor(private projectService: ProjectService, private toastr: ToastrService) { }
+  constructor(private modelService: ModelService, private modalService: BsModalService,
+              private projectService: ProjectService, private toastr: ToastrService) {
+  }
 
   ngOnInit(): void {
-    const getSub = this.projectService.getProjects().subscribe(projects => {
+    this.projectService.getProjects().subscribe(projects => {
       this.projects = projects;
     });
-    getSub.unsubscribe();
   }
 
   deleteProject(name: string): void {
-    const deleteProject = this.projectService.deleteProject(name).subscribe(projects => {
-      this.toastr.success(`Successfully deleted project ${name}`, 'Project');
-      this.projects = projects;
-    },
-      err => this.toastr.error(err, 'Project')
-    );
-    deleteProject.unsubscribe();
+    const confirmDelete = this.modalService.show(ConfirmDeleteComponent, {initialState: {name, type: EntitiesEnum.Project}});
+    confirmDelete.content.onClose.subscribe(result => {
+      if (result) {
+        this.projectService.deleteProject(name).subscribe(projects => {
+            this.toastr.success(`Successfully deleted project ${name}`, EntitiesEnum.Project);
+            this.projects = projects;
+          },
+          err => this.toastr.error(err, EntitiesEnum.Project)
+        );
+      }
+    });
   }
-
-
 }
